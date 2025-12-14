@@ -31,7 +31,7 @@ func main() {
 	err = process()
 	if errors.Is(err, ErrProcessingFailure) {
 		zapLogger.Warn("something failed",
-			zap.Dict("error_context", zaperrorcontext.AsError(err)...),
+			zap.Dict("error_context", zaperrorcontext.AsContext(err)...),
 			zap.Error(err))
 	}
 }
