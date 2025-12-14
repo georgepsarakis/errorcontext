@@ -25,13 +25,13 @@ func (e *Error) Context() []attribute.KeyValue {
 	return e.BaseError.ContextFields()[:]
 }
 
-func AsError(err error) *Error {
+func AsContext(err error) []attribute.KeyValue {
 	if err == nil {
 		return nil
 	}
 	var o *Error
 	if errors.As(err, &o) {
-		return o
+		return o.Context()
 	}
 	return nil
 }

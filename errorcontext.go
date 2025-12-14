@@ -21,6 +21,7 @@ func (e *BaseError[T]) Error() string {
 	return e.originalErr.Error()
 }
 
+// Unwrap allows the original error to be resolved by errors.Is & errors.As.
 func (e *BaseError[T]) Unwrap() error {
 	return e.originalErr
 }
@@ -36,10 +37,14 @@ func (e *BaseError[T]) ContextFields() T {
 	return e.contextFields
 }
 
+// SetContextFields is a setter that replaces the attached error context.
 func (e *BaseError[T]) SetContextFields(f T) {
 	e.contextFields = f
 }
 
+// Collect finds aggregates all errors that match the given target type,
+// within the error chain of err. The resulting slice contains target error instances
+// in reverse order.
 func Collect[T error](err error) []T {
 	if err == nil {
 		return nil

@@ -26,7 +26,7 @@ func (e *Error) AddContextFields(f ...zap.Field) {
 	e.BaseError.SetContextFields(append(e.BaseError.ContextFields(), f...))
 }
 
-func AsError(err error) []zap.Field {
+func AsContext(err error) []zap.Field {
 	if err == nil {
 		return nil
 	}
@@ -37,7 +37,7 @@ func AsError(err error) []zap.Field {
 	return nil
 }
 
-func ChainContext(err error) []zap.Field {
+func AsChainContext(err error) []zap.Field {
 	if err == nil {
 		return nil
 	}

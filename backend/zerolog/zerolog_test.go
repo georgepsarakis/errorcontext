@@ -71,7 +71,7 @@ func TestChainContext(t *testing.T) {
 	ze2 := NewError(ze1, zerolog.Dict().Str("c", "d"))
 
 	ev := lg.Info()
-	for i, c := range ChainContext(ze2) {
+	for i, c := range AsChainContext(ze2) {
 		ev.Dict(fmt.Sprintf("err%d", i+1), c.Context)
 	}
 	ev.Send()

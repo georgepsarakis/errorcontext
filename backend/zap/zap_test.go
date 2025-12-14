@@ -49,5 +49,5 @@ func TestChainContext(t *testing.T) {
 			zap.String("tag2", "test2"),
 			zap.String("tag1", "test1"),
 		},
-		ChainContext(zf2))
+		AsChainContext(zf2))
 }

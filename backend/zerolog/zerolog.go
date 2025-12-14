@@ -26,10 +26,6 @@ func NewError(err error, dict *zerolog.Event) *Error {
 	}
 }
 
-func (e *Error) AddContextFields(f map[string]any) {
-	e.BaseError.SetContextFields(e.BaseError.ContextFields().Fields(f))
-}
-
 func (e *Error) Context() *zerolog.Event {
 	if e == nil {
 		return zerolog.Dict()
@@ -37,13 +33,17 @@ func (e *Error) Context() *zerolog.Event {
 	return e.BaseError.ContextFields()
 }
 
-func AsError(err error) *Error {
+func (e *Error) AddContextFields(f map[string]any) {
+	e.BaseError.SetContextFields(e.BaseError.ContextFields().Fields(f))
+}
+
+func AsContext(err error) *zerolog.Event {
 	if err == nil {
 		return nil
 	}
 	var z *Error
 	if errors.As(err, &z) {
-		return z
+		return z.ContextFields()
 	}
 	return nil
 }
@@ -53,7 +53,7 @@ type ErrorEventPair struct {
 	Context *zerolog.Event
 }
 
-func ChainContext(err error) []ErrorEventPair {
+func AsChainContext(err error) []ErrorEventPair {
 	if err == nil {
 		return nil
 	}

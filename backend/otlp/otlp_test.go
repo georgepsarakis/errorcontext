@@ -18,5 +18,5 @@ func TestError_Context(t *testing.T) {
 			attribute.Bool("attr1", true),
 			attribute.String("attr2", "test"),
 		},
-		AsError(err).Context())
+		AsContext(err))
 }
