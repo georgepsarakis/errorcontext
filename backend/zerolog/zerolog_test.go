@@ -155,7 +155,7 @@ func TestPanicHandler(t *testing.T) {
 
 	var c map[string]any
 
-	require.NoError(t, json.Unmarshal([]byte(output.String()), &c))
+	require.NoError(t, json.Unmarshal(output.Bytes(), &c))
 
 	var ctx map[string]any
 

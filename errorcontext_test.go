@@ -80,7 +80,7 @@ func TestRecoverer_Wrap(t *testing.T) {
 						"field1": "undefined behavior",
 						"field2": "panic with map",
 					})
-					return nil
+					return nil //nolint:govet
 				},
 				panicValueTransformer: func(r any) (string, error) {
 					switch v := r.(type) {

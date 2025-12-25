@@ -2,7 +2,6 @@ package zap
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -99,6 +98,6 @@ func TestPanicHandler(t *testing.T) {
 	require.NoError(t, json.Unmarshal(b, &stackLines))
 	assert.Contains(t,
 		stackLines[2],
-		"errorcontext/backend/zap/zap_test.go:73",
-		fmt.Sprintf("%s", strings.Join(stackLines, "\n")))
+		"errorcontext/backend/zap/zap_test.go:72",
+		strings.Join(stackLines, "\n"))
 }

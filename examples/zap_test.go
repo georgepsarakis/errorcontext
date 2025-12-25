@@ -16,7 +16,9 @@ func ExampleAsContext() {
 	if err != nil {
 		panic(err)
 	}
-	defer zapLogger.Sync()
+	defer func() {
+		_ = zapLogger.Sync()
+	}()
 	err = tryWithError()
 	if errors.Is(err, ErrProcessingFailure) {
 		zapLogger.Warn("something failed",

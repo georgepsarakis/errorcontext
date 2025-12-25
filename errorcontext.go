@@ -10,7 +10,6 @@ import (
 )
 
 type BaseError[T any] struct {
-	error
 	originalErr   error
 	contextFields T
 	isPanic       bool
@@ -93,8 +92,7 @@ type Panic struct {
 type ErrorGenerator[T error] func(p Panic) T
 
 func DefaultErrorGenerator(p Panic) error {
-	return errors.New(
-		fmt.Sprintf("%s\n%s", p.Message, strings.Join(p.Stack, "\n")))
+	return fmt.Errorf("%s\n%s", p.Message, strings.Join(p.Stack, "\n"))
 }
 
 var _ ErrorGenerator[error] = DefaultErrorGenerator

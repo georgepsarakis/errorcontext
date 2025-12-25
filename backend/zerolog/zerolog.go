@@ -30,11 +30,11 @@ func (e *Error) Context() *zerolog.Event {
 	if e == nil {
 		return zerolog.Dict()
 	}
-	return e.BaseError.ContextFields()
+	return e.ContextFields()
 }
 
 func (e *Error) AddContextFields(f map[string]any) {
-	e.BaseError.SetContextFields(e.BaseError.ContextFields().Fields(f))
+	e.SetContextFields(e.ContextFields().Fields(f))
 }
 
 func (e *Error) MarkAsPanic() *Error {

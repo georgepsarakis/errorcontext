@@ -19,11 +19,11 @@ func NewError(err error, context ...zap.Field) *Error {
 }
 
 func (e *Error) Context() []zap.Field {
-	return e.BaseError.ContextFields()
+	return e.ContextFields()
 }
 
 func (e *Error) AddContextFields(f ...zap.Field) {
-	e.BaseError.SetContextFields(append(e.BaseError.ContextFields(), f...))
+	e.SetContextFields(append(e.ContextFields(), f...))
 }
 
 func (e *Error) MarkAsPanic() *Error {

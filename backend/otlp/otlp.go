@@ -22,7 +22,7 @@ func (e *Error) Context() []attribute.KeyValue {
 	if e == nil {
 		return nil
 	}
-	return e.BaseError.ContextFields()[:]
+	return e.ContextFields()[:]
 }
 
 func AsContext(err error) []attribute.KeyValue {
