@@ -2,6 +2,7 @@ package zerolog
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -9,8 +10,11 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/rs/zerolog/pkgerrors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/rs/zerolog"
+
+	"github.com/georgepsarakis/errorcontext"
 )
 
 func init() {
@@ -43,7 +47,7 @@ func TestError_Context(t *testing.T) {
     "stack": [
       {
         "func": "TestError_Context",
-        "line": "31",
+        "line": "35",
         "source": "zerolog_test.go"
       },
       {
@@ -83,7 +87,7 @@ func TestChainContext(t *testing.T) {
 			"stack": [
 			  {
 				"func": "TestChainContext",
-				"line": "69",
+				"line": "73",
 				"source": "zerolog_test.go"
 			  },
 			  {
@@ -104,7 +108,7 @@ func TestChainContext(t *testing.T) {
 			"stack": [
 			  {
 				"func": "TestChainContext",
-				"line": "69",
+				"line": "73",
 				"source": "zerolog_test.go"
 			  },
 			  {
@@ -123,4 +127,51 @@ func TestChainContext(t *testing.T) {
 		  "time": "2025-01-02T11:22:33Z"
 		}
 	`, output.String())
+}
+
+func TestPanicHandler(t *testing.T) {
+	var err error
+	recoverer := errorcontext.Recoverer[*Error]{
+		NewErrorFunc: func(p errorcontext.Panic) *Error {
+			return FromPanic(p)
+		},
+	}
+	require.NotPanics(t, func() {
+		type temp struct {
+			fieldA string
+		}
+		var tmp *temp
+		err = recoverer.Wrap(func() error {
+			tmp.fieldA = "panic"
+			return nil
+		})
+	})
+
+	var ze *Error
+	require.ErrorAs(t, err, &ze)
+
+	lg, output := newLogger(t)
+	lg.Error().Dict("context", ze.ContextFields()).Send()
+
+	var c map[string]any
+
+	require.NoError(t, json.Unmarshal([]byte(output.String()), &c))
+
+	var ctx map[string]any
+
+	require.IsType(t, ctx, c)
+
+	ctx = c["context"].(map[string]any)
+
+	require.IsType(t, ctx["stack"], []any{})
+
+	stack := ctx["stack"].([]any)
+
+	assert.IsType(t, stack[0], "")
+	assert.Contains(t, stack[0].(string), "panic")
+	assert.Contains(t, stack[2].(string), "errorcontext/backend/zerolog/zerolog_test.go:145")
+
+	msg := ctx["panic"]
+
+	assert.Equal(t, msg, "panic: runtime error: invalid memory address or nil pointer dereference")
 }

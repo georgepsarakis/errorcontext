@@ -26,6 +26,11 @@ func (e *Error) AddContextFields(f ...zap.Field) {
 	e.BaseError.SetContextFields(append(e.BaseError.ContextFields(), f...))
 }
 
+func (e *Error) MarkAsPanic() *Error {
+	_ = e.BaseError.MarkAsPanic()
+	return e
+}
+
 func AsContext(err error) []zap.Field {
 	if err == nil {
 		return nil
@@ -46,4 +51,12 @@ func AsChainContext(err error) []zap.Field {
 		z = append(z, e.Context()...)
 	}
 	return z
+}
+
+func FromPanic(p errorcontext.Panic) *Error {
+	return NewError(
+		errors.New(p.Message),
+		zap.String(errorcontext.FieldNamePanicMessage, p.Message),
+		zap.Strings(errorcontext.FieldNamePanicStackTrace, p.Stack),
+	).MarkAsPanic()
 }

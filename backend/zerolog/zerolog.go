@@ -37,6 +37,11 @@ func (e *Error) AddContextFields(f map[string]any) {
 	e.BaseError.SetContextFields(e.BaseError.ContextFields().Fields(f))
 }
 
+func (e *Error) MarkAsPanic() *Error {
+	_ = e.BaseError.MarkAsPanic()
+	return e
+}
+
 func AsContext(err error) *zerolog.Event {
 	if err == nil {
 		return nil
@@ -66,4 +71,16 @@ func AsChainContext(err error) []ErrorEventPair {
 			})
 	}
 	return z
+}
+
+func FromPanic(p errorcontext.Panic) *Error {
+	return NewError(
+		errors.New(p.Message),
+		zerolog.Dict().Fields(
+			map[string]any{
+				errorcontext.FieldNamePanicMessage:    p.Message,
+				errorcontext.FieldNamePanicStackTrace: p.Stack,
+			},
+		),
+	).MarkAsPanic()
 }
