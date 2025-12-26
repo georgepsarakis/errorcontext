@@ -39,6 +39,7 @@ func (e *Error) AddContextFields(f map[string]any) {
 
 func (e *Error) MarkAsPanic() *Error {
 	_ = e.BaseError.MarkAsPanic()
+	e.AddContextFields(map[string]any{"is_panic": true})
 	return e
 }
 

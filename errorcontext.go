@@ -53,6 +53,9 @@ func (e *BaseError[T]) MarkAsPanic() *BaseError[T] {
 }
 
 func (e *BaseError[T]) IsPanic() bool {
+	if e == nil {
+		return false
+	}
 	return e.isPanic
 }
 

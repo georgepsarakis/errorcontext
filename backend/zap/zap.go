@@ -28,6 +28,7 @@ func (e *Error) AddContextFields(f ...zap.Field) {
 
 func (e *Error) MarkAsPanic() *Error {
 	_ = e.BaseError.MarkAsPanic()
+	e.AddContextFields(zap.Bool("is_panic", true))
 	return e
 }
 

@@ -60,14 +60,8 @@ func ExampleRecoverer() {
 		return nil
 	})
 	if err := grp.Wait(); err != nil {
-		var ze *zaperrorcontext.Error
-		var isPanic bool
-		if errors.As(err, &ze) {
-			isPanic = ze.IsPanic()
-		}
 		zapLogger.Warn("something failed",
 			zap.Dict("error_context", zaperrorcontext.AsContext(err)...),
-			zap.Bool("is_panic", isPanic),
 			zap.Error(err))
 	}
 	//Output: Hello World

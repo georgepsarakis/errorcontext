@@ -80,7 +80,7 @@ func TestPanicHandler(t *testing.T) {
 
 	fields := AsContext(err)
 	require.NotEmpty(t, fields)
-	require.Len(t, fields, 2)
+	require.Len(t, fields, 3)
 
 	zfPanic := fields[0]
 
