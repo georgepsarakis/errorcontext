@@ -1,4 +1,4 @@
-package examples
+package errorcontext_test
 
 import (
 	"errors"
