@@ -5,13 +5,16 @@ Loggers & [OpenTelemetry Metrics](https://github.com/open-telemetry/opentelemetr
 
 ## Why use this package?
 
-✅ Cleaner Logs: No more hunting for IDs; your context is embedded in the error.
-✅ Standardized Recovery: A consistent way to turn panics into trackable errors.
-✅ Backend Agnostic: Works seamlessly with the logging libraries you already use.
+- ✅ Cleaner Logs: No more hunting for IDs; your context is embedded in the error.
+
+- ✅ Standardized Recovery: A consistent way to turn panics into trackable errors.
+
+- ✅ Backend Agnostic: Works seamlessly with the logging libraries you already use.
 
 Check out the documentation and start making your Go errors more meaningful!
 
 🔗 Docs: https://pkg.go.dev/github.com/georgepsarakis/errorcontext
+
 📦 GitHub: https://github.com/georgepsarakis/errorcontext
 
 ## Motivation
