@@ -2,6 +2,7 @@ package zap
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -15,7 +16,7 @@ import (
 	"github.com/georgepsarakis/errorcontext"
 )
 
-func TestError_Context(t *testing.T) {
+func TestError_ContextFields(t *testing.T) {
 	t.Parallel()
 
 	core, observedLogs := observer.New(zap.InfoLevel)
@@ -54,15 +55,13 @@ func TestChainContext(t *testing.T) {
 			zap.String("tag1", "test1"),
 		},
 		AsChainContext(zf2))
+
+	assert.Nil(t, AsChainContext(nil))
 }
 
 func TestPanicHandler(t *testing.T) {
 	var err error
-	recoverer := errorcontext.Recoverer[*Error]{
-		NewErrorFunc: func(p errorcontext.Panic) *Error {
-			return FromPanic(p)
-		},
-	}
+	recoverer := errorcontext.NewRecoverer[*Error](FromPanic)
 	require.NotPanics(t, func() {
 		type temp struct {
 			fieldA string
@@ -97,7 +96,47 @@ func TestPanicHandler(t *testing.T) {
 	var stackLines []string
 	require.NoError(t, json.Unmarshal(b, &stackLines))
 	assert.Contains(t,
-		stackLines[2],
-		"errorcontext/backend/zap/zap_test.go:72",
+		stackLines[10],
+		"errorcontext/backend/zap/zap_test.go",
 		strings.Join(stackLines, "\n"))
+}
+
+func TestAsContext(t *testing.T) {
+	type args struct {
+		err error
+	}
+	tests := []struct {
+		name string
+		args args
+		want []zap.Field
+	}{
+		{
+			name: "nil",
+			args: args{
+				err: nil,
+			},
+			want: nil,
+		},
+		{
+			name: "wrapped errorcontext/zap.Error found",
+			args: args{
+				err: fmt.Errorf("wrapped error: %w",
+					NewError(errors.New("test error"), zap.Bool("is_test", true))),
+			},
+			want: []zap.Field{zap.Bool("is_test", true)},
+		},
+		{
+			name: "errorcontext/zap.Error not found",
+			args: args{
+				err: fmt.Errorf("wrapped error: %w", errors.New("test error")),
+			},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equalf(t, tt.want, AsContext(tt.args.err), "AsContext(%v)", tt.args.err)
+		})
+	}
 }

@@ -130,12 +130,11 @@ func TestChainContext(t *testing.T) {
 }
 
 func TestPanicHandler(t *testing.T) {
+	t.Parallel()
+
 	var err error
-	recoverer := errorcontext.Recoverer[*Error]{
-		NewErrorFunc: func(p errorcontext.Panic) *Error {
-			return FromPanic(p)
-		},
-	}
+	recoverer := errorcontext.NewRecoverer[*Error](FromPanic)
+
 	require.NotPanics(t, func() {
 		type temp struct {
 			fieldA string
@@ -168,8 +167,8 @@ func TestPanicHandler(t *testing.T) {
 	stack := ctx["stack"].([]any)
 
 	assert.IsType(t, stack[0], "")
-	assert.Contains(t, stack[0].(string), "panic")
-	assert.Contains(t, stack[2].(string), "errorcontext/backend/zerolog/zerolog_test.go:145")
+	assert.Contains(t, stack[7].(string), "panic")
+	assert.Contains(t, stack[10].(string), "errorcontext/backend/zerolog/zerolog_test.go")
 
 	msg := ctx["panic"]
 

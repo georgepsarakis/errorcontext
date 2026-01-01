@@ -46,15 +46,11 @@ func ExampleRecoverer() {
 		panic(err)
 	}
 	grp := errgroup.Group{}
-	recoverer := errorcontext.Recoverer[*zaperrorcontext.Error]{
-		NewErrorFunc: func(p errorcontext.Panic) *zaperrorcontext.Error {
-			return zaperrorcontext.FromPanic(p)
-		},
-	}
+	recoverer := errorcontext.NewRecoverer[*zaperrorcontext.Error](zaperrorcontext.FromPanic)
+
 	grp.Go(recoverer.WrapFunc(func() error {
 		panic("something bad happened")
 	}))
-
 	grp.Go(func() error {
 		fmt.Println("Hello World")
 		return nil

@@ -101,23 +101,39 @@ func DefaultErrorGenerator(p Panic) error {
 var _ ErrorGenerator[error] = DefaultErrorGenerator
 
 type Recoverer[T error] struct {
+	// newErrorFunc converts a Panic value to a type with the `error` interface.
+	// This is a required parameter.
+	newErrorFunc ErrorGenerator[T]
+	// PanicValueTransform if set will try to format arbitrary panic value types,
+	// such as a struct or a map.
 	PanicValueTransform func(r any) (string, error)
-	NewErrorFunc        ErrorGenerator[T]
+	// SkippedStackTraceLines sets the number of stack trace lines to be skipped.
+	// In-library stack trace lines may be considered irrelevant or noise and
+	// thus can be optionally skipped. By default, no lines are skipped.
+	SkippedStackTraceLines uint
 }
 
 func NewRecoverer[T error](newError ErrorGenerator[T]) Recoverer[T] {
+	if newError == nil {
+		panic(ErrNewErrorFuncNotSet)
+	}
 	return Recoverer[T]{
-		NewErrorFunc: newError,
+		newErrorFunc: newError,
 	}
 }
+
+var ErrNewErrorFuncNotSet = errors.New("error generator function is not set")
 
 // Wrap allows recovery from panics for the given function.
 // Panics are translated and propagated as errors that can be handled accordingly.
 // Note: unrecovered panics can cause an abnormal program exit.
 func (r Recoverer[T]) Wrap(fn func() error) (err error) {
+	if r.newErrorFunc == nil {
+		return fn()
+	}
 	defer func() {
 		if rv := recover(); rv != nil {
-			err = r.NewErrorFunc(r.Format(rv))
+			err = r.newErrorFunc(r.Format(rv))
 		}
 	}()
 	err = fn()
@@ -130,9 +146,7 @@ func (r Recoverer[T]) Wrap(fn func() error) (err error) {
 // A common use case is to pass the function directly to errgroup.Submit:
 //
 //	grp := errgroup.Group{}
-//	recoverer := errorcontext.Recoverer[error]{
-//		NewErrorFunc: errorcontext.DefaultErrorGenerator,
-//	}
+//	recoverer := errorcontext.NewRecoverer[error](errorcontext.DefaultErrorGenerator)
 //	grp.Go(recoverer.WrapFunc(func() error {
 //		panic("something bad happened")
 //	}))
@@ -169,10 +183,10 @@ func (r Recoverer[T]) Format(rv any) Panic {
 	debugStack := debug.Stack()
 	stackLines := make([]string, 0, bytes.Count(debugStack, []byte{'\n'}))
 	scanner := bufio.NewScanner(bytes.NewReader(debugStack))
-	lineNumber := 0
+	var lineNumber uint
 	for scanner.Scan() {
 		lineNumber++
-		if lineNumber <= 8 {
+		if lineNumber <= r.SkippedStackTraceLines {
 			continue
 		}
 		stackLines = append(stackLines, scanner.Text())
